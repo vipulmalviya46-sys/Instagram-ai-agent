@@ -1,6 +1,7 @@
 """FastAPI server: Instagram webhook + endpoints for content and analytics agents."""
 import hashlib
 import hmac
+import os
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel
@@ -100,3 +101,10 @@ def analytics_report(limit: int = 20):
 @app.get("/health")
 def health():
     return {"ok": True}
+
+
+# Run with:  python server.py   (no flags needed; binds to Render's PORT)
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", "10000")))

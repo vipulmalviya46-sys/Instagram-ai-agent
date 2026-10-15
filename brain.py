@@ -4,11 +4,21 @@ import anthropic
 
 import config
 
-_client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+_client = None
+
+
+def _get_client() -> "anthropic.Anthropic":
+    """Create the client lazily so a missing key never crashes server startup."""
+    global _client
+    if _client is None:
+        if not config.ANTHROPIC_API_KEY:
+            raise RuntimeError("ANTHROPIC_API_KEY is not set")
+        _client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    return _client
 
 
 def ask(system: str, messages: list[dict], max_tokens: int = 800) -> str:
-    resp = _client.messages.create(
+    resp = _get_client().messages.create(
         model=config.CLAUDE_MODEL,
         max_tokens=max_tokens,
         system=system,
